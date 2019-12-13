@@ -20,4 +20,4 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 
-Route::get('/webhook', 'WebhookController@index')->name('webhook');
+Route::post('/webhook', 'WebhookController@index')->name('webhook');
