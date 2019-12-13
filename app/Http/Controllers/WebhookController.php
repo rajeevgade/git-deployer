@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 class WebhookController extends BaseController
 {
     public function index(Request $request){
-        return $this->sendResponse($request);
+
+        $content = file_get_contents("php://input");
+
+        return $this->sendResponse(json_encode($content));
     }
 }
