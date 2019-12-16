@@ -12,27 +12,9 @@ class WebhookController extends BaseController
 
         $startTime = microtime(true);
 
-        $this->updateLog($file, date("d-m-Y (H:i:s)", time()) . "\n");
-
-        $headers = $request->headers->all();
-
-        $postData = $request->getContent();
-
         $content = file_get_contents('php://input');
 
         $this->validateData($content);
-
-        /* if(!$validate){
-            return $this->sendError("No Valid Handler Found");
-        } */
-
-        $endTime = microtime(true);
-
-        $message = "Repo <repo-name> - <branch-name> synced in " .number_format($endTime - $startTime, 2) . "seconds";
-            
-        $this->updateLog($file, $message);
-
-        return $this->sendResponse($message);
     }
 
     public function validateData($content){
@@ -47,6 +29,8 @@ class WebhookController extends BaseController
         $message = "";
 
         $file = $repository_name . '_deploy.log';
+
+        $this->updateLog($file, date("d-m-Y (H:i:s)", time()) . "\n");
         
         echo "CHECKING Repository " . $repository_name . " IN Database";
 
@@ -244,6 +228,14 @@ class WebhookController extends BaseController
                 echo $error;
             }
         }
+
+        $endTime = microtime(true);
+
+        $message = "Repo <repo-name> - <branch-name> synced in " .number_format($endTime - $startTime, 2) . "seconds";
+            
+        $this->updateLog($file, $message);
+
+        return $this->sendResponse($message);
     }
 
     public function updateLog($file, $msg = ""){
