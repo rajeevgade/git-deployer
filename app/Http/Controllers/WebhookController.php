@@ -264,7 +264,7 @@ class WebhookController extends BaseController
         // format the error
         //$error = "=== ERROR: " . $reason . " ===\n*** ACCESS DENIED ***\n";
         // forbid
-        //http_response_code(403);
+        http_response_code($code);
 
         // write the error to the log and the body
         Storage::append($file, $error . "\n\n");
