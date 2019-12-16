@@ -10,14 +10,15 @@ class WebhookController extends BaseController
 {
     public function index(Request $request){
 
-        $startTime = microtime(true);
-
         $content = file_get_contents('php://input');
 
         $this->validateData($content);
     }
 
     public function validateData($content){
+
+        $startTime = microtime(true);
+        
         $token = false;
         
         $json = json_decode($content, true); 
