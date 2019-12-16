@@ -35,18 +35,47 @@
       <td>{{ $project->branch }}</td>
       <td><i class="fa fa-check"></i></td>
       <td>
-        <a href="{{ url('projects/edit/'. $project->id) }}" class="btn btn-primary">
+        <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-primary">
           <i class="fa fa-edit"></i>  Edit
         </a>
-        <a href="{{ url('projects/delete/'. $project->id) }}" class="ml-2 btn btn-danger">
+        <button class="ml-2 btn btn-danger delete-project" data-project-id="{{ $project->id }}" type="button">
             <i class="fa fa-trash"></i> Delete
-        </a>
+        </button>
       </td>
     </tr>
     @endforeach
   </tbody>
 </table>
 
+<form id="delete-form" action="{{ url('/projects') }}" method="POST" style="display: none;">
+    @csrf
+    {{ method_field('DELETE') }}
+</form>
+
 </div>
+
+
+<script>
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var aElems = document.getElementsByClassName('delete-project');
+        for(var i=0; i<aElems.length; i++){
+            aElems[i].onclick = function(){
+                var check = confirm("Are you sure you want to delete this project?");
+                if(check){
+                    let projectID = this.getAttribute('data-project-id');
+                    let deleteForm = document.getElementById('delete-form');
+                    deleteForm.action += '/' + projectID;
+                    deleteForm.submit();
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+    }, false);
+})();
+</script>
 
 @endsection

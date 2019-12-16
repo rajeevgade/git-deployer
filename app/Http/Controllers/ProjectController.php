@@ -83,7 +83,19 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate(Project::getRules());
+        
+        $project = Project::find($id);
+
+        $project->update($validatedData);
+        
+        if($project){
+            session()->flash('success', 'Project ' . $project->name .' Updated Successfully!');
+
+            return redirect('/projects');
+        }else{
+            return redirect()->back()->withInput()->withErrors($request->all());
+        }
     }
 
     /**
@@ -94,6 +106,12 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $project = Project::find($id);
+
+        $project->delete();
+
+        session()->flash('success', 'Project Deleted Successfully!');
+
+        return redirect('/projects');
     }
 }
