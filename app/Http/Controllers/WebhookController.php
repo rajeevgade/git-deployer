@@ -44,6 +44,10 @@ class WebhookController extends BaseController
         
         $repository_name = ($repository) ? $repository["name"] : "test-deployer";
 
+        print_r($json);
+        
+        echo "READING Repository " . $repository_name;
+
         $project = Project::where('name', $repository_name)->first();
 
         $directory = "";
@@ -56,7 +60,7 @@ class WebhookController extends BaseController
             $this->serverError("Repo not found in Database", 404);
         }else{
             //project exists in our database
-            $directory = "/var/www/html/" . $project->name;
+            $directory = $project->path;
             $branch = "refs/heads/" . $project->branch;
 
             $afterPull = $project->pre_hook;
