@@ -29,7 +29,7 @@ class WebhookController extends BaseController
 
         $message = "";
 
-        $file = public_path() . '/' . $repository_name . '_deploy.log';
+        $file = 'public/' . $repository_name . '_deploy.log';
 
         $this->updateLog($file, date("d-m-Y (H:i:s)", time()) . "\n");
         
