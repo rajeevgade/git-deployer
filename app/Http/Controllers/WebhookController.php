@@ -106,7 +106,7 @@ class WebhookController extends BaseController
                         if ($exit !== 0) {
                             //http_response_code(500);
                             $output = "=== ERROR: Reset to head failed using GIT `" . $git . "` ===\n" . $output;
-                            return $this->sendError($output, 500);
+                            $this->serverError($output, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -126,7 +126,7 @@ class WebhookController extends BaseController
                         if ($exit !== 0) {
                             //http_response_code(500);
                             $output = "=== ERROR: BEFORE_PULL `" . $beforePull . "` failed ===\n" . $output;
-                            return $this->sendError($output, 500);
+                            $this->serverError($output, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -142,7 +142,7 @@ class WebhookController extends BaseController
                     if ($exit !== 0) {
                         //http_response_code(500);
                         $output = "=== ERROR: Pull failed using GIT `" . $git . "` and DIR `" . $directory . "` ===\n" . $output;
-                        return $this->sendError($output, 500);
+                        $this->serverError($output, 500);
                     }
                     // write the output to the log and the body
                     $this->updateLog($output);
@@ -160,7 +160,7 @@ class WebhookController extends BaseController
                         if ($exit !== 0) {
                             //http_response_code(500);
                             $output = "=== ERROR: Reset failed using GIT `" . $git . "` and \$sha `" . $sha . "` ===\n" . $output;
-                            return $this->sendError($output, 500);
+                            $this->serverError($output, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -180,7 +180,7 @@ class WebhookController extends BaseController
                         if ($exit !== 0) {
                             //http_response_code(500);
                             $output = "=== ERROR: AFTER_PULL `" . $afterPull . "` failed ===\n" . $output;
-                            return $this->sendError($output, 500);
+                            $this->serverError($output, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -199,7 +199,7 @@ class WebhookController extends BaseController
                     }
                     // bad request
                     //http_response_code(400);
-                    return $this->sendError($error, 400);
+                    $this->serverError($error, 400);
                     // write the error to the log and the body
                     $this->updateLog($error);
                     echo $error;
@@ -208,7 +208,7 @@ class WebhookController extends BaseController
                 $error = "=== ERROR: Pushed branch `" . $json["ref"] . "` does not match BRANCH `" . $branch . "` ===\n";
                 // bad request
                 //http_response_code(400);
-                return $this->sendError($error, 400);
+                $this->serverError($error, 400);
                 // write the error to the log and the body
                 $this->updateLog($error);
                 echo $error;
@@ -251,13 +251,26 @@ class WebhookController extends BaseController
         //$this->sendError('Not Authorized to make a request', 403);
 
         // write the error to the log and the body
-        //fputs($file, $error . "\n\n");
         Storage::append($file, $error . "\n\n");
         
         echo $error;
-        // close the log
-        //fclose($file);
-        // stop executing
+        $this->sendError('Not Authorized to make a request', 403);
+        exit;
+    }
+
+    // function to forbid access
+    public function serverError($error, $code = 404) {
+        $file = "deploy.log";
+        // format the error
+        //$error = "=== ERROR: " . $reason . " ===\n*** ACCESS DENIED ***\n";
+        // forbid
+        //http_response_code(403);
+
+        // write the error to the log and the body
+        Storage::append($file, $error . "\n\n");
+        
+        echo $error;
+        $this->sendError($error, $code);
         exit;
     }
 }
