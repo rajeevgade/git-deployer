@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class WebhookController extends BaseController
 {
@@ -37,21 +38,23 @@ class WebhookController extends BaseController
 
     public function updateLog($msg = ""){
 
-        $log_file = '/logs/git.log';
+        //$log_file = 'git.log';
         
         $content = "===================";
         $content .= $msg;
         $content .= "===================";
+
+        Storage::append('git.log', $content);
         
         //open file and write log message
-        if (!file_exists($log_file)){
+        /* if (!file_exists($log_file)){
 			file_put_contents($log_file, $content);
 		}
         else{
 			$fp = fopen($log_file, 'a');
 			fwrite($fp, $content);  
 			fclose($fp);  
-		}
+		} */
 		
     }
 }
