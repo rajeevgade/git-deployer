@@ -62,23 +62,28 @@ class WebhookController extends BaseController
         if (!empty($secretToken) && isset($_SERVER["HTTP_X_HUB_SIGNATURE"]) && $token !== hash_hmac($algo, $content, $secretToken)) {
             $message = "X-Hub-Signature does not match TOKEN";
             $this->updateLog($message);
-            return $this->sendError($message);
+            //return $this->sendError($message);
+            $this->forbid($message);
         // Check for a GitLab token
         } elseif (!empty($secretToken) && isset($_SERVER["HTTP_X_GITLAB_TOKEN"]) && $token !== $secretToken) {
             $message = "X-GitLab-Token does not match TOKEN";
             $this->updateLog($message);
-            return $this->sendError($message);
+            //return $this->sendError($message);
+            $this->forbid($message);
         // Check for a $_GET token
         } elseif (!empty($secretToken) && isset($_GET["token"]) && $token !== $secretToken) {
             $message = "\$_GET[\"token\"] does not match TOKEN";
             $this->updateLog($message);
-            return $this->sendError($message);
+            //return $this->sendError($message);
+            $this->forbid($message);
         // if none of the above match, but a token exists, exit
         } elseif (!empty($secretToken) && !isset($_SERVER["HTTP_X_HUB_SIGNATURE"]) && !isset($_SERVER["HTTP_X_GITLAB_TOKEN"]) && !isset($_GET["token"])) {
             $message = "No token detected";
             $this->updateLog($message);
-            return $this->sendError($message);
+            //return $this->sendError($message);
+            $this->forbid($message);
         } else {
+
             // check if pushed branch matches branch specified in config
             if ($json["ref"] === $branch) {
                 $this->updateLog($content . PHP_EOL);
@@ -230,12 +235,13 @@ class WebhookController extends BaseController
     }
 
     // function to forbid access
-    public function forbid($file, $reason) {
+    public function forbid($reason) {
+        $file = "deploy.log";
         // format the error
         $error = "=== ERROR: " . $reason . " ===\n*** ACCESS DENIED ***\n";
         // forbid
-        //http_response_code(403);
-        $this->sendError('Not Authorized to make a request', 403);
+        http_response_code(403);
+        //$this->sendError('Not Authorized to make a request', 403);
 
         // write the error to the log and the body
         //fputs($file, $error . "\n\n");
