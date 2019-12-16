@@ -42,11 +42,11 @@ class WebhookController extends BaseController
         
         $repository = (isset($json["repository"])) ? $json["repository"] : "";
         
-        $repository_name = ($repository) ? $repository["name"] : "test-deployer";
+        $repository_name = ($repository) ? $repository["full_name"] : "test-deployer";
 
-        print_r($json);
+        $message = "";
         
-        echo "READING Repository " . $repository_name;
+        echo "CHECKING Repository " . $repository_name . " IN Database";
 
         $project = Project::where('name', $repository_name)->first();
 
