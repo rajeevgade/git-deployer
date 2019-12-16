@@ -35,6 +35,11 @@
       <td>{{ $project->branch }}</td>
       <td><i class="fa fa-check"></i></td>
       <td>
+        @if(file_exists(public_path() . '/' . $project->name .'_deploy.log'))
+        <a href="{{ url($project->name .'_deploy.log') }}" class="btn btn-success">
+          <i class="fa fa-eye-open"></i>  View Log
+        </a>
+        @endif
         <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-primary">
           <i class="fa fa-edit"></i>  Edit
         </a>

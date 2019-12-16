@@ -31,6 +31,9 @@ class WebhookController extends BaseController
 
         $file = 'public/' . $repository_name . '_deploy.log';
 
+        if(Storage::exists($file))
+            Storage::delete($file);
+
         $this->updateLog($file, date("d-m-Y (H:i:s)", time()) . "\n");
         
         echo "CHECKING Repository " . $repository_name . " IN Database";
@@ -44,8 +47,12 @@ class WebhookController extends BaseController
         $secretToken = "";
 
         if(!$project){
-            $this->serverError($file, "Repo not found in Database", 404);
+            $this->serverError($file, "Repo not found in your Database", 404);
         }else{
+            if(!$project->status){
+                $this->serverError($file, "Repo not set to active in your Database", 500);
+            }
+
             //project exists in our database
             $directory = $project->path;
             $branch = "refs/heads/" . $project->branch;
@@ -57,6 +64,11 @@ class WebhookController extends BaseController
 
             //$project->email_result;
         }
+
+        $project->update([
+                            'last_hook_time' => date("d-m-Y (H:i:s)", time()),
+                            'last_hook_status' => 0
+                        ]);
         
         $DIR = preg_match("/\/$/", $directory) ? $directory : $directory . "/";
         $git = "/usr/bin/git";
@@ -72,30 +84,28 @@ class WebhookController extends BaseController
         }
 
         $message = "";
+        $output = "";
+        $error = "";
 
         // Check for a GitHub signature
         if (!empty($secretToken) && isset($_SERVER["HTTP_X_HUB_SIGNATURE"]) && $token !== hash_hmac($algo, $content, $secretToken)) {
             $message = "X-Hub-Signature does not match TOKEN";
             $this->updateLog($file, $message);
-            //return $this->sendError($message);
             $this->forbid($file, $message);
         // Check for a GitLab token
         } elseif (!empty($secretToken) && isset($_SERVER["HTTP_X_GITLAB_TOKEN"]) && $token !== $secretToken) {
             $message = "X-GitLab-Token does not match TOKEN";
             $this->updateLog($file, $message);
-            //return $this->sendError($message);
             $this->forbid($file, $message);
         // Check for a $_GET token
         } elseif (!empty($secretToken) && isset($_GET["token"]) && $token !== $secretToken) {
             $message = "\$_GET[\"token\"] does not match TOKEN";
             $this->updateLog($file, $message);
-            //return $this->sendError($message);
             $this->forbid($file, $message);
         // if none of the above match, but a token exists, exit
         } elseif (!empty($secretToken) && !isset($_SERVER["HTTP_X_HUB_SIGNATURE"]) && !isset($_SERVER["HTTP_X_GITLAB_TOKEN"]) && !isset($_GET["token"])) {
             $message = "No token detected";
             $this->updateLog($file, $message);
-            //return $this->sendError($message);
             $this->forbid($file, $message);
         } else {
 
@@ -119,8 +129,8 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            //http_response_code(500);
                             $output = "=== ERROR: Reset to head failed using GIT `" . $git . "` ===\n" . $output;
+                            $this->updateLog($file, $output);
                             $this->serverError($file, $output, 500);
                         }
                         // write the output to the log and the body
@@ -139,8 +149,8 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            //http_response_code(500);
                             $output = "=== ERROR: BEFORE_PULL `" . $beforePull . "` failed ===\n" . $output;
+                            $this->updateLog($file, $output);
                             $this->serverError($file, $output, 500);
                         }
                         // write the output to the log and the body
@@ -155,8 +165,8 @@ class WebhookController extends BaseController
                     $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                     // if an error occurred, return 500 and log the error
                     if ($exit !== 0) {
-                        //http_response_code(500);
                         $output = "=== ERROR: Pull failed using GIT `" . $git . "` and DIR `" . $directory . "` ===\n" . $output;
+                        $this->updateLog($file, $output);
                         $this->serverError($file, $output, 500);
                     }
                     // write the output to the log and the body
@@ -173,8 +183,8 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            //http_response_code(500);
                             $output = "=== ERROR: Reset failed using GIT `" . $git . "` and \$sha `" . $sha . "` ===\n" . $output;
+                            $this->updateLog($file, $output);
                             $this->serverError($file, $output, 500);
                         }
                         // write the output to the log and the body
@@ -193,8 +203,8 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            //http_response_code(500);
                             $output = "=== ERROR: AFTER_PULL `" . $afterPull . "` failed ===\n" . $output;
+                            $this->updateLog($file, $output);
                             $this->serverError($file, $output, 500);
                         }
                         // write the output to the log and the body
@@ -212,25 +222,29 @@ class WebhookController extends BaseController
                     } elseif (!is_dir($directory)) {
                         $error = "=== ERROR: DIR `" . $directory . "` is not a directory ===\n";
                     }
-                    // bad request
-                    //http_response_code(400);
-                    $this->serverError($file, $error, 400);
                     // write the error to the log and the body
                     $this->updateLog($file, $error);
+                    // bad request
+                    $this->serverError($file, $error, 400);
                     echo $error;
                 }
             } else{
                 $error = "=== ERROR: Pushed branch `" . $json["ref"] . "` does not match BRANCH `" . $branch . "` ===\n";
-                // bad request
-                //http_response_code(400);
-                $this->serverError($file, $error, 400);
                 // write the error to the log and the body
                 $this->updateLog($file, $error);
+                // bad request
+                $this->serverError($file, $error, 400);
                 echo $error;
             }
         }
 
         $endTime = microtime(true);
+
+        $project->update([
+                            'last_hook_duration' => number_format($endTime - $startTime, 2),
+                            'last_hook_time' => date("d-m-Y (H:i:s)", time()),
+                            'last_hook_status' => 1
+                        ]);
 
         $message = "Repo <repo-name> - <branch-name> synced in " .number_format($endTime - $startTime, 2) . "seconds";
             
