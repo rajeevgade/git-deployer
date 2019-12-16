@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -37,12 +38,35 @@ class WebhookController extends BaseController
     public function validateData($content){
         $token = false;
         //$file = 'deploy.log';
-        $secretToken = "test123";
         $json = json_decode($content, true); 
-        $branch = "refs/heads/master";
+        
+        $repository = (isset($json["repository"])) ? $json["repository"] : "";
+        
+        $repository_name = ($repository) ? $repository["name"] : "test-deployer";
+
+        $project = Project::where('name', $repository_name)->first();
+
+        $directory = "";
+        $branch = "";
         $afterPull = "";
         $beforePull = "";
-        $directory = "/var/www/html/test-deployer/";
+        $secretToken = "";
+
+        if(!$project){
+            $this->serverError("Repo not found in Database", 404);
+        }else{
+            //project exists in our database
+            $directory = "/var/www/html/" . $project->name;
+            $branch = "refs/heads/" . $project->branch;
+
+            $afterPull = $project->pre_hook;
+            $beforePull = $project->post_hook;
+
+            $secretToken = $project->secret;
+
+            //$project->email_result;
+        }
+        
         $DIR = preg_match("/\/$/", $directory) ? $directory : $directory . "/";
         $git = "/usr/bin/git";
         $sha = false;
@@ -214,31 +238,15 @@ class WebhookController extends BaseController
                 echo $error;
             }
         }
-
-
-        return true;
     }
 
     public function updateLog($msg = ""){
 
-        //$log_file = 'git.log';
-        
         $content = "===================";
         $content .= $msg;
         $content .= "===================";
 
-        Storage::append('git.log', $content);
-        
-        //open file and write log message
-        /* if (!file_exists($log_file)){
-			file_put_contents($log_file, $content);
-		}
-        else{
-			$fp = fopen($log_file, 'a');
-			fwrite($fp, $content);  
-			fclose($fp);  
-		} */
-		
+        Storage::append('git.log', $content);		
     }
 
     // function to forbid access
