@@ -12,6 +12,32 @@ class Project extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'branch', 'path', 'status', 'secret', 'pre_hook', 'email_result', 'user_id', 'last_hook_status', 'last_hook_time', 'last_hook_duration', 'last_hook_log'
+        'name', 'branch', 'path', 'status', 'secret', 'pre_hook', 'post_hook', 'email_result', 'last_hook_status', 'last_hook_time', 'last_hook_duration', 'last_hook_log'
     ];
+
+    public $timestamps = false;
+
+    /**
+     * Return model validation rules
+     *
+     * @return array
+     */
+    public static function getRules($merge = []) {
+        return array_merge([
+            'name' => ['required', 'string', 'max:255'],
+            'branch' => ['required', 'string', 'max:255'],
+            'path' => ['required', 'string'],
+            'status' => ['required'],
+            'secret' => ['required', 'string'],
+            'pre_hook' => ['nullable', 'string'],
+            'post_hook' => ['nullable', 'string'],
+            'email_result' => ['nullable', 'string'],
+            'last_hook_status' => ['nullable', 'string'],
+            'last_hook_time' => ['nullable', 'string'],
+            'last_hook_duration' => ['nullable'],
+            'last_hook_log' => ['nullable', 'string'],
+        ], $merge);
+    }
+
+
 }

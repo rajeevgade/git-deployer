@@ -23,12 +23,10 @@ class CreateProjectsTable extends Migration
             $table->string('pre_hook')->nullable();
             $table->string('post_hook')->nullable();
             $table->string('email_result')->nullable();
-            $table->bigInteger('user_id');
             $table->integer('last_hook_status')->nullable();
             $table->dateTime('last_hook_time')->nullable();
             $table->integer('last_hook_duration')->nullable();
             $table->longText('last_hook_log')->nullable();
-            //$table->timestamps();
         });
     }
 

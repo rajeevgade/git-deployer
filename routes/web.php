@@ -11,13 +11,12 @@
 |
 */
 
-Route::get('/', function () {
-    return view('auth.login');
-});
+Route::get('/', 'HomeController@index');
 
 Auth::routes(['register' => false, 'verify' => false]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-
 Route::post('/webhook', 'WebhookController@index')->name('webhook');
+
+Route::resource('projects', 'ProjectController')->middleware('auth');
