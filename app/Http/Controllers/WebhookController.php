@@ -18,7 +18,7 @@ class WebhookController extends BaseController
     public function validateData($content){
 
         $startTime = microtime(true);
-        
+
         $token = false;
         
         $json = json_decode($content, true); 
@@ -245,7 +245,7 @@ class WebhookController extends BaseController
         $content .= $msg;
         $content .= "===================";
 
-        Storage::append($file, $content);		
+        Storage::disk('public')->append($file, $content);
     }
 
     // function to forbid access
@@ -257,7 +257,7 @@ class WebhookController extends BaseController
         //$this->sendError('Not Authorized to make a request', 403);
 
         // write the error to the log and the body
-        Storage::append($file, $error . "\n\n");
+        Storage::disk('public')->append($file, $error . "\n\n");
         
         echo $error;
         $this->sendError('Not Authorized to make a request', 403);
@@ -272,7 +272,7 @@ class WebhookController extends BaseController
         http_response_code($code);
 
         // write the error to the log and the body
-        Storage::append($file, $error . "\n\n");
+        Storage::disk('public')->append($file, $error . "\n\n");
         
         echo $error;
         $this->sendError($error, $code);
