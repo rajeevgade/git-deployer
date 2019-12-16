@@ -104,8 +104,9 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            http_response_code(500);
+                            //http_response_code(500);
                             $output = "=== ERROR: Reset to head failed using GIT `" . $git . "` ===\n" . $output;
+                            $this->sendError($message, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -123,8 +124,9 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            http_response_code(500);
+                            //http_response_code(500);
                             $output = "=== ERROR: BEFORE_PULL `" . $beforePull . "` failed ===\n" . $output;
+                            $this->sendError($message, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -138,8 +140,9 @@ class WebhookController extends BaseController
                     $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                     // if an error occurred, return 500 and log the error
                     if ($exit !== 0) {
-                        http_response_code(500);
+                        //http_response_code(500);
                         $output = "=== ERROR: Pull failed using GIT `" . $git . "` and DIR `" . $directory . "` ===\n" . $output;
+                        $this->sendError($message, 500);
                     }
                     // write the output to the log and the body
                     $this->updateLog($output);
@@ -155,8 +158,9 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            http_response_code(500);
+                            //http_response_code(500);
                             $output = "=== ERROR: Reset failed using GIT `" . $git . "` and \$sha `" . $sha . "` ===\n" . $output;
+                            $this->sendError($message, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -174,8 +178,9 @@ class WebhookController extends BaseController
                         $output = (!empty($output) ? implode("\n", $output) : "[no output]") . "\n";
                         // if an error occurred, return 500 and log the error
                         if ($exit !== 0) {
-                            http_response_code(500);
+                            //http_response_code(500);
                             $output = "=== ERROR: AFTER_PULL `" . $afterPull . "` failed ===\n" . $output;
+                            $this->sendError($message, 500);
                         }
                         // write the output to the log and the body
                         $this->updateLog($output);
@@ -193,7 +198,8 @@ class WebhookController extends BaseController
                         $error = "=== ERROR: DIR `" . $directory . "` is not a directory ===\n";
                     }
                     // bad request
-                    http_response_code(400);
+                    //http_response_code(400);
+                    $this->sendError($message, 400);
                     // write the error to the log and the body
                     $this->updateLog($error);
                     echo $error;
@@ -201,7 +207,8 @@ class WebhookController extends BaseController
             } else{
                 $error = "=== ERROR: Pushed branch `" . $json["ref"] . "` does not match BRANCH `" . $branch . "` ===\n";
                 // bad request
-                http_response_code(400);
+                //http_response_code(400);
+                $this->sendError($message, 400);
                 // write the error to the log and the body
                 $this->updateLog($error);
                 echo $error;
