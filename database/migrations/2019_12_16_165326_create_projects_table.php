@@ -27,6 +27,9 @@ class CreateProjectsTable extends Migration
             $table->string('last_hook_time')->nullable();
             $table->integer('last_hook_duration')->nullable();
             $table->longText('last_hook_log')->nullable();
+            $table->string('ssh_ip')->nullable();
+            $table->string('ssh_username')->nullable();
+            $table->string('ssh_password')->nullable();
         });
     }
 
