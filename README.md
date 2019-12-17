@@ -27,7 +27,8 @@ $ composer install
 
 //create and configure your config file
 $ cp .env.example .env
-—- change your db credentials and app_domain value to your ip or domain name 
+$ vi .env
+—- change your db credentials
 
 //create an encryption key unique for your app
 $ php artisan key:generate
@@ -42,16 +43,15 @@ $ php artisan config:cache
 $ npm install
 ```
 
-## DEMO
-
-- Email: rajeevgade@gmail.com
-- Password: adminuser
-
 ## Configuration
 
 - Copy/Edit `.env.example` file and rename it to `.env` (skip if you already did it!)
-- Update Database Credentials
+- Update Database Credentials in .env file (skip if you already did it!)
 
+## Demo Login
+
+- Email: rajeevgade@gmail.com
+- Password: adminuser
 
 ## Running (Skip this step if you have Laravel Valet or if you're running this app on Server)
 
@@ -64,7 +64,9 @@ $ php artisan serve --port=80
 
 ## Required Permissions
 
-If you are facing any issues regarding the permissions, then you need to run the following command in your project directory:
+### Localhost
+
+If you are facing any issues with the permissions on your local machine, try running the following command in your project directory:
 
 ```bash
 $ sudo chmod -R 775 bootstrap/cache
@@ -72,7 +74,9 @@ $ sudo chmod -R 775 bootstrap/cache
 $ sudo chmod -R 775 storage
 ```
 
-### On Server
+### Server
+
+If you are facing any issues with the permissions on your server, try running the following command in your project directory:
 
 ```bash
 $ sudo chown -R $USER:www-data storage
