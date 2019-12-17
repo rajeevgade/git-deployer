@@ -2,6 +2,11 @@
 
 Push changes to your linux server automatically (after setting up webhook for your repository)
 
+## Helpful Links
+
+- [How to setup Github SSH Keys](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+- [Github Webhooks](https://developer.github.com/webhooks)
+
 ## Requirements
 
 - PHP 7.2+ 
