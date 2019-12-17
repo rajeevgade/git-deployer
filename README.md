@@ -50,7 +50,7 @@ $ npm install
 
 ## Demo Login
 
-- Email: rajeevgade@gmail.com
+- Email: admin@admin.com
 - Password: adminuser
 
 ## Running (Skip this step if you have Laravel Valet or if you're running this app on Server)
